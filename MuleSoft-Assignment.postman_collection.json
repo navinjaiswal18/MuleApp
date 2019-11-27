@@ -1,0 +1,206 @@
+{
+	"info": {
+		"_postman_id": "9dcebd54-b9c1-4d46-984d-9f9ac14dd2f6",
+		"name": "MuleSoft-Assignment",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All Accounts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8082/api/accounts",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"accounts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Accounts with limit",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8082/api/accounts?limit=3",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"accounts"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Accounts By Name",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8082/api/accounts?name=Navin",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"accounts"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "Navin"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Account By Id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8082/api/accounts/201",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"accounts",
+						"201"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create Bulk Accounts",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\n[\t\n\t{\n\t\t\"Name\":\"A201\",\n\t\t\"External-Identifier\":\"201\",\n\t\t\"Revenue\":123,\n\t\t\"Rating\":\"Warm\",\n\t\t\"Description\":\"A201 Account\",\n\t\t\"Industry\":\"Banking\"\n\t\t\n\t},\n\t{\n\t\t\"Name\":\"A202\",\n\t\t\"External-Identifier\":\"202\",\n\t\t\"Revenue\":123,\n\t\t\"Rating\":\"Hot\",\n\t\t\"Description\":\"A202 Account\",\n\t\t\"Industry\":\"Banking\"\n\t\t\n\t}\n\t\n\t]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8082/api/accounts",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"accounts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update Account",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\t\"Name\":\"A201\",\n\t\t\"External-Identifier\":\"201\",\n\t\t\"Revenue\":123,\n\t\t\"Rating\":\"Warm\",\n\t\t\"Description\":\"A201 Account\",\n\t\t\"Industry\":\"Banking\"\n\t\t\n\t}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8082/api/accounts/201",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"accounts",
+						"201"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create/update Account",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\t\"Name\":\"A201\",\n\t\t\"External-Identifier\":\"201\",\n\t\t\"Revenue\":123,\n\t\t\"Rating\":\"Warm\",\n\t\t\"Description\":\"A201 Account\",\n\t\t\"Industry\":\"Banking\"\n\t\t\n\t}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8082/api/accounts/201",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"accounts",
+						"201"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
