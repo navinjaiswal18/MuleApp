@@ -1,0 +1,123 @@
+#%RAML 1.0
+types:
+  account:
+    description: account object for salesforce.
+    properties:
+      Name?:
+        example: ABC
+        type: string
+      External-Identifier?:
+        example: Example
+        type: string
+      Description?:
+        example: Example
+        type: string
+      Revenue?:
+        example: 1
+        type: number
+        maximum: 9007199254740991
+        format: double
+      Industry?:
+        description: Industry value for Salesforce account.
+        enum:
+          - Agriculture
+          - Apparel
+          - Banking
+          - Biotechnology
+          - Chemicals
+          - Communications
+          - Construction
+          - Consulting
+          - Education
+          - Electronics
+          - Energy
+          - Engineering
+          - Entertainment
+          - Environmental
+          - Finance
+          - Food & Beverage
+          - Government
+          - Healthcare
+          - Hospitality
+          - Insurance
+          - Machinery
+          - Manufacturing
+          - Media
+          - Not For Profit
+          - Recreation
+          - Retail
+          - Shipping
+          - Technology
+          - Telecommunications
+          - Transportation
+          - Utilities
+          - Other
+        example: Agriculture
+        type: string
+      Rating?:
+        enum:
+          - Hot
+          - Warm
+          - Cold
+        example: Warm
+        type: string
+title: Salesforce API
+baseUri: localhost:8081
+description: Salesforce API to get, create, update accounts.
+version: "1.2"
+protocols:
+  - HTTP
+/accounts:
+  get:
+    displayName: getAccounts
+    queryParameters:
+      limit?:
+        example: 1
+        type: number
+        format: int
+      name?:
+        example: Example
+        type: string
+    responses:
+      "200":
+        body:
+          application/json:            
+              type: account[]
+  post:
+    displayName: createMultipleAccounts
+    description: create multiple accounts in salesforce
+    body:
+      application/json:        
+          type: account[]
+    responses:
+      "201":
+        description: Account has been created successfully.
+      "400":
+        body: {}
+/accounts/{id}:
+  get:
+    displayName: getAccountByExt-id
+    description: get account based on external id
+    body: {}
+    securedBy: []
+  put:
+    displayName: createAccount
+    description: create or update a dedicated account.
+    body:
+      application/json:
+        type: account
+    responses:
+      "200":
+        body:
+          application/json:
+            type: account
+  patch:
+    displayName: updateAccount
+    description: update a dedicated account based in id
+    body:
+      application/json:
+        type: account
+  uriParameters:
+    id:
+      example: Example
+      type: string

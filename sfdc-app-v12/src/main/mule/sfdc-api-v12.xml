@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <http:listener-config name="sfdc-api-v12-httpListenerConfig">
+        <http:listener-connection host="localhost" port="8082" />
+    </http:listener-config>
+    <apikit:config name="sfdc-api-v12-config" api="sfdc-api-v12.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="5f850838-8c9d-440e-9dbf-ab3ed20ff9b5" >
+		<salesforce:cached-basic-connection username="navinjaiswal@accenture.com" password="NAVIN@123" securityToken="E5iMqoqaXYz9LrsTHB2ZiHOW" />
+	</salesforce:sfdc-config>
+	<flow name="sfdc-api-v12-main">
+        <http:listener config-ref="sfdc-api-v12-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="sfdc-api-v12-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="sfdc-api-v12-console">
+        <http:listener config-ref="sfdc-api-v12-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="sfdc-api-v12-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="put:\accounts\(id):application\json:sfdc-api-v12-config">
+        <logger level="INFO" message="put:\accounts\(id):application\json:sfdc-api-v12-config" />
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <salesforce:upsert type="Account" doc:name="Upsert" doc:id="d3c99ee6-48dc-4ab6-8d17-08266ed0fffd" config-ref="Salesforce_Config" externalIdFieldName="External_Identifier__c">
+			<salesforce:records ><![CDATA[#[output application/java
+---
+[{
+	Name: payload.Name,
+	Industry: payload.Industry,
+	AnnualRevenue: payload.Revenue,
+	Description: payload.Description,
+	Rating: payload.Rating,
+	External_Identifier__c: attributes.uriParams.id
+}]]]]></salesforce:records>
+		</salesforce:upsert>
+		<ee:transform doc:name="Transform Message" doc:id="43a252ce-259a-4cd9-bd99-f9219dc4e2d9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+	<flow name="patch:\accounts\(id):application\json:sfdc-api-v12-config">
+        <logger level="INFO" message="patch:\accounts\(id):application\json:sfdc-api-v12-config" />
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <salesforce:query doc:name="Query" doc:id="d79c8006-658d-4d82-94c6-4389b1e50f8f" config-ref="Salesforce_Config" target="QueryResult">
+			<salesforce:salesforce-query >select id from account where External_Identifier__c = ':ext-id' </salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"ext-id" : vars.id
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<choice doc:name="Choice" doc:id="181c430a-ec58-4932-a79c-efabedb299ff" >
+			<when expression="#[vars.QueryResult.Id != null]">
+				<salesforce:update type="Account" doc:name="Update" doc:id="f381b4dc-80db-441a-90f6-f25b0e2fe8ef" config-ref="Salesforce_Config">
+					<salesforce:records ><![CDATA[#[output application/java
+---
+vars.QueryResult map ( queryResult , indexOfQueryResult ) -> {
+	Id: queryResult.Id,
+	Name: payload.Name,
+	Industry: payload.Industry,
+	AnnualRevenue: payload.Revenue,
+	Description: payload.Description,
+	Rating: payload.Rating
+}]]]></salesforce:records>
+				</salesforce:update>
+				<ee:transform doc:name="Transform Message" doc:id="108e23cf-ba7c-4571-8500-982b20f72031" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="eb487224-de90-4303-81ab-c71178b0ad19">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message:"Account not found in Salesforce."
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<raise-error doc:name="Raise error" doc:id="4d641947-85b4-4295-9878-48add62f61d8" type="CUSTOM:NOT_FOUND" description="Account not found in Salesforce."/>
+			</otherwise>
+		</choice>
+    </flow>
+    <flow name="get:\accounts:sfdc-api-v12-config">
+        <logger level="INFO" message="get:\accounts:sfdc-api-v12-config" />
+		<set-variable value="#[attributes.queryParams.limit]" doc:name="Set Variable - limit" doc:id="48216eb3-c645-4d76-b6b3-7df8a8aefb8e" variableName="limit"/>
+		<set-variable value="#[attributes.queryParams.name]" doc:name="Set Variable - name" doc:id="951ab06a-84aa-4a34-bed2-7b8615b888e0" variableName="name"/>
+		<choice doc:name="Choice" doc:id="7cccf49f-a13a-4760-b3b4-88cd6cabe575" >
+			<when expression="#[vars.name != null]">
+				<salesforce:query doc:name="Query" doc:id="87ac06a7-129c-4600-b1a9-9dbc588cf352" config-ref="Salesforce_Config">
+					<salesforce:salesforce-query >select Id,External_Identifier__c,Name, AnnualRevenue,Rating, Description,Industry from account where name = ':name'</salesforce:salesforce-query>
+					<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"name" : vars.name
+}]]]></salesforce:parameters>
+				</salesforce:query>
+			</when>
+			<when expression="#[vars.limit != null]">
+				<salesforce:query doc:name="Query" doc:id="df23913c-ea1c-41de-992a-2912e15eb4c6" config-ref="Salesforce_Config">
+					<salesforce:salesforce-query >select Id,External_Identifier__c,Name, AnnualRevenue,Rating, Description,Industry from account limit :limit</salesforce:salesforce-query>
+					<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"limit" : vars.limit
+}]]]></salesforce:parameters>
+				</salesforce:query>
+			</when>
+			<otherwise >
+				<salesforce:query doc:name="Query" doc:id="ada49ceb-a40a-4c91-96c7-2c456251ab3c" config-ref="Salesforce_Config">
+					<salesforce:salesforce-query >select Id,External_Identifier__c,Name, AnnualRevenue,Rating, Description,Industry from account</salesforce:salesforce-query>
+				</salesforce:query>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="dd6f5625-d721-4d1a-bd7e-ffb173355357" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="get:\accounts\(id):sfdc-api-v12-config">
+        <logger level="INFO" message="get:\accounts\(id):sfdc-api-v12-config" />
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" doc:id="b83edfe9-6331-46c4-99ea-19d0de8e778a">
+            <ee:variables>
+                <ee:set-variable variableName="id"><![CDATA[attributes.uriParams.'id']]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <salesforce:query doc:name="Query" doc:id="e93c62f6-5355-4d9a-abc5-c98298e8be9f" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query >select Id,External_Identifier__c,Name, AnnualRevenue,Rating, Description,Industry from account where External_Identifier__c = ':ext-id'</salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"ext-id" : vars.id
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="970df0af-e4de-4466-a97a-1b12e2afd072" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="post:\accounts:application\json:sfdc-api-v12-config">
+        <logger level="INFO" message="post:\accounts:application\json:sfdc-api-v12-config" />
+		<salesforce:create-bulk type="Account" doc:name="Create bulk" doc:id="e7b0d5ad-3ac3-4d67-bd30-d8b46d4c6547" config-ref="Salesforce_Config">
+			<salesforce:objects ><![CDATA[#[output application/java
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Name: payload01.Name,
+	Industry: payload01.Industry,
+	AnnualRevenue: payload01.Revenue,
+	Description: payload01.Description,
+	Rating: payload01.Rating,
+	External_Identifier__c: payload01."External-Identifier"
+}]]]></salesforce:objects>
+		</salesforce:create-bulk>
+		<ee:transform doc:name="Transform Message" doc:id="2fa19981-4b4e-4e4d-b869-a63067011051" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+</mule>
